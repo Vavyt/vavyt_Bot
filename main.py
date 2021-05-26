@@ -1,6 +1,9 @@
 import asyncio
 import os
 import discord
+import kick as kick
+import target as target
+from discord import user
 from discord.ext import commands
 from discord.ext.commands import bot
 from discord.utils import get
@@ -32,7 +35,7 @@ async def on_ready():
 @client.command(aliases=['Help'])
 async def help(ctx):
     channel = ctx.channel
-    await channel.send('```Here are the commands for Vavyt:  \n -------------------------------- \n ~ping  -  pings \n ~WhereIsMyGuineaPig  -  Finds the guinea pig \n ~clear  -  Clears all messages in a channel \n ~join  -  Vavyt joins the voice channel \n ~leave  -  Vavyt leaves the voice channel it is in \n ~play  -  Usage: ~play (Youtube link here). Plays audio from a Youtube link \n ~pause  -  Pauses audio playing in a voice channel  \n ~resume  -  Resumes audio in a voice channel \n ~stop  -  Stops playing audio from Youtube link in a voice channel```')
+    await channel.send('```Here are the commands for Vavyt:  \n -------------------------------- \n ~ping  -  pings \n ~WhereIsMyGuineaPig  -  Finds the guinea pig \n ~clear  -  Clears all messages in a channel \n ~join  -  Vavyt joins the voice channel \n ~leave  -  Vavyt leaves the voice channel it is in \n ~play  -  Usage: ~play (Youtube link here). Plays audio from a Youtube link \n ~pause  -  Pauses audio playing in a voice channel  \n ~resume  -  Resumes audio in a voice channel \n ~stop  -  Stops playing audio from Youtube link in a voice channel \n ~downUnder  -  Talk to the australian \n ~ban  -  Bans and reinvites a user (Admin only) ```')
 
 
 @client.command(aliases=['Ping'])
@@ -49,10 +52,11 @@ async def WhereIsMyGuineaPig(ctx):
 
 @client.command(aliases=['purge'])
 async def clear(ctx):  # ctx -> cont
-    await ctx.message.delete()  # deletes the message that called the command
-
     channel = ctx.channel
+    await channel.send('All messages are going to be deleted. Please do not send a message until the channel is clear')
     await channel.send('Deleting messages. . .')
+    await asyncio.sleep(5)
+    await ctx.message.delete()  # deletes the message that called the command
     async for message in channel.history(limit=200):
         await message.delete()
 
@@ -86,6 +90,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.url = ""
 
+
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
@@ -107,6 +112,7 @@ async def join(ctx):
         channel = ctx.message.author.voice.channel
     await channel.connect()
 
+
 #Command to leave author's voice channel
 @client.command(aliases=['Leave'])
 async def leave(ctx):
@@ -115,6 +121,7 @@ async def leave(ctx):
         await voice_client.disconnect()
     else:
         await ctx.send("The bot is not connected to a voice channel.")
+
 
 #plays audio from a youtube link through bot in voice channel
 @client.command(aliases=['Play'])
@@ -172,6 +179,17 @@ async def stop(ctx):
    voice.stop()
    ctx.message.send('Stopping . . . ')
 
+
+@client.command(aliases=['downunder' , 'DownUnder', 'Downunder' ])
+async def downUnder(ctx):
+    channel = ctx.channel
+    await channel.send('<@!198439663361327104>  sᴉɥʇ punoɹ, ɹɐǝƃ ƃuᴉɥƃnɐl ɹnoʎ dɐɹM')
+
+@client.command(aliases=['Ban'])
+@commands.has_permissions(administrator=True)
+async def ban(ctx,member: discord.Member, *, reason=None):
+    await member.send('https://discord.gg/YfmFaZR79j')
+    await member.kick(reason=reason)
 
 client.run(os.getenv('DISCORD_TOKEN'))
 # https://discordpy.readthedocs.io/en/latest/api.html
