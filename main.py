@@ -1,33 +1,27 @@
 import asyncio
 import os
 import discord
-import kick as kick
-import target as target
-from discord import user
 from discord.ext import commands
-from discord.ext.commands import bot
 from discord.utils import get
 from dotenv import load_dotenv
 import youtube_dl
 
-#Loads Vavyt's Discord token into main.py to be called
+# Loads Vavyt's Discord token into main.py to be called
 load_dotenv('TOKEN.env')
 
-
-#sets the prefix of commands
+# sets the prefix of commands
 client = commands.Bot(command_prefix='~')
 
-
-#Removes "help" command to be reassigned
+# Removes "help" command to be reassigned
 client.remove_command('help')
 
 
-#Bot initialization
+# Bot initialization
 @client.event
 async def on_ready():
     print('{0.user} is online.'.format(client))
-    channel = client.get_channel(844326203875000350)
-    await channel.send('Online')
+    # channel = client.get_channel(844326203875000350)
+    # await channel.send('Online')
     game = discord.Game("Use ~help")
     await client.change_presence(status=discord.Status.idle, activity=game)
 
@@ -35,7 +29,8 @@ async def on_ready():
 @client.command(aliases=['Help'])
 async def help(ctx):
     channel = ctx.channel
-    await channel.send('```Here are the commands for Vavyt:  \n -------------------------------- \n ~ping  -  pings \n ~WhereIsMyGuineaPig  -  Finds the guinea pig \n ~clear  -  Clears all messages in a channel \n ~join  -  Vavyt joins the voice channel \n ~leave  -  Vavyt leaves the voice channel it is in \n ~play  -  Usage: ~play (Youtube link here). Plays audio from a Youtube link \n ~pause  -  Pauses audio playing in a voice channel  \n ~resume  -  Resumes audio in a voice channel \n ~stop  -  Stops playing audio from Youtube link in a voice channel \n ~downUnder  -  Talk to the australian \n ~ban  -  Bans and reinvites a user (Admin only) ```')
+    await channel.send(
+        '```Here are the commands for Vavyt:  \n -------------------------------- \n ~ping  -  pings \n ~WhereIsMyGuineaPig  -  Finds the guinea pig \n ~clear  -  Clears all messages in a channel \n ~join  -  Vavyt joins the voice channel \n ~leave  -  Vavyt leaves the voice channel it is in \n ~play  -  Usage: ~play (Youtube link here). Plays audio from a Youtube link \n ~pause  -  Pauses audio playing in a voice channel  \n ~resume  -  Resumes audio in a voice channel \n ~stop  -  Stops playing audio from Youtube link in a voice channel \n ~downUnder  -  Talk to the australian \n ~ban  -  Bans and reinvites a user (Admin only) \n ~shutdown  -  Shuts down the bot for maintenance (Owner only) ```')
 
 
 @client.command(aliases=['Ping'])
@@ -61,7 +56,7 @@ async def clear(ctx):  # ctx -> cont
         await message.delete()
 
 
-#Sets up the youtube downloader to prepare to play songs
+# Sets up the youtube downloader to prepare to play songs
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 ytdl_format_options = {
@@ -74,7 +69,7 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0'  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
 ffmpeg_options = {
@@ -83,13 +78,13 @@ ffmpeg_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get('title')
         self.url = ""
-
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -102,7 +97,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return filename
 
 
-#Command to join author's voice channel
+# Command to join author's voice channel
 @client.command(aliases=['Join'])
 async def join(ctx):
     if not ctx.message.author.voice:
@@ -113,7 +108,7 @@ async def join(ctx):
     await channel.connect()
 
 
-#Command to leave author's voice channel
+# Command to leave author's voice channel
 @client.command(aliases=['Leave'])
 async def leave(ctx):
     voice_client = ctx.message.guild.voice_client
@@ -123,7 +118,7 @@ async def leave(ctx):
         await ctx.send("The bot is not connected to a voice channel.")
 
 
-#plays audio from a youtube link through bot in voice channel
+# plays audio from a youtube link through bot in voice channel
 @client.command(aliases=['Play'])
 async def play(ctx, url):
     song_there = os.path.isfile("song.mp3")
@@ -154,7 +149,7 @@ async def play(ctx, url):
     voice.is_playing()
 
 
-#Pauses audio being played in voice channel
+# Pauses audio being played in voice channel
 @client.command(aliases=['Pause'])
 async def pause(ctx):
     voice = discord.utils.get(client.voice_clients)
@@ -163,34 +158,44 @@ async def pause(ctx):
         ctx.message.send('Paused')
 
 
-#Resumes paused audio in voice channel
+# Resumes paused audio in voice channel
 @client.command(aliases=['Resume'])
 async def resume(ctx):
-  voice = discord.utils.get(client.voice_clients)
-  if voice.is_paused():
-    voice.resume()
-    ctx.message.send('Resuming')
+    voice = discord.utils.get(client.voice_clients)
+    if voice.is_paused():
+        voice.resume()
+        ctx.message.send('Resuming')
 
 
-#Stops playing audio in voice channel
+# Stops playing audio in voice channel
 @client.command(aliases=['Stop'])
 async def stop(ctx):
-   voice = discord.utils.get(client.voice_clients)
-   voice.stop()
-   ctx.message.send('Stopping . . . ')
+    voice = discord.utils.get(client.voice_clients)
+    voice.stop()
+    ctx.message.send('Stopping . . . ')
 
 
-@client.command(aliases=['downunder' , 'DownUnder', 'Downunder' ])
+@client.command(aliases=['downunder', 'DownUnder', 'Downunder'])
 async def downUnder(ctx):
     channel = ctx.channel
     await channel.send('<@!198439663361327104>  sᴉɥʇ punoɹ, ɹɐǝƃ ƃuᴉɥƃnɐl ɹnoʎ dɐɹM')
 
+
 @client.command(aliases=['Ban'])
 @commands.has_permissions(administrator=True)
-async def ban(ctx,member: discord.Member, *, reason=None):
+async def ban(member: discord.Member, *, reason=None):
     await member.send('https://discord.gg/YfmFaZR79j')
     await member.kick(reason=reason)
 
+
+@client.command()
+@commands.is_owner()
+async def shutdown(ctx):
+    await ctx.message.delete()
+    await ctx.channel.send('Bot undergoing maintenance and will not respond to commands. Please wait. . .  ')
+    await ctx.bot.logout()
+
+
 client.run(os.getenv('DISCORD_TOKEN'))
 # https://discordpy.readthedocs.io/en/latest/api.html
-#await client.process_commands(message)  # process commands after checking on_message
+# await client.process_commands(message)  # process commands after checking on_message
